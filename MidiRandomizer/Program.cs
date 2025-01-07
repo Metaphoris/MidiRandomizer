@@ -1,92 +1,39 @@
-﻿using Melanchall.DryWetMidi.Common;
-using Melanchall.DryWetMidi.Core;
-using Melanchall.DryWetMidi.Interaction;
-using Melanchall.DryWetMidi.MusicTheory;
-
-namespace MidiRandomizer
+﻿namespace MidiRandomizer
 {
     internal class Program
     {
-        public const string FileName = "Song.mid";
-
         static void Main(string[] args)
         {
-            //CreateSingleNoteTrack();
-            //ChangeNotePositions();
-            ReadNotes();
+            PrintStartText();
+            ExecuteUserAction();
             Console.WriteLine("Done!");
         }
-
-        static void CreateSingleNoteTrack()
+        
+        static void PrintStartText()
         {
-            var midiFile = new MidiFile(
-                new TrackChunk(
-                    new SetTempoEvent(500000)),
-                new TrackChunk(
-                    new TextEvent("It's just single note track..."),
-                    new NoteOnEvent((SevenBitNumber)60, (SevenBitNumber)45),
-                    new NoteOffEvent((SevenBitNumber)60, (SevenBitNumber)0)
-                    {
-                        DeltaTime = 400
-                    }));
-
-            midiFile.Write(FileName);
+            Console.WriteLine("Hello! What do you want to do?");
+            Console.WriteLine("Enter \"1\" to create single note track");
+            Console.WriteLine("Enter \"2\" to print all notes positions");
+            Console.WriteLine("Enter \"3\" to randomize all notes positions");
         }
 
-        static void ChangeNotePositions()
+        static void ExecuteUserAction()
         {
-            var midiFile = MidiFile.Read(FileName);
-
-            foreach (var trackChunk in midiFile.GetTrackChunks())
+            var choise = Console.ReadLine();
+            switch (choise)
             {
-                using (var notesManager = trackChunk.ManageNotes())
-                {
-                    notesManager.Objects.RemoveAll(n => n.NoteName == NoteName.CSharp);
-
-                    //if (notesManager.Objects.Any())
-                    //{
-                    //    var times = notesManager.Objects.Select(t => t.Time).ToList();
-                    //}
-
-                    Random gen = new Random();
-                    Random gen2 = new Random();
-
-                    foreach (var note in notesManager.Objects)
-                    {
-                        int prob = gen.Next(100);
-                        int prob2 = gen2.Next(12);
-
-                        if (prob < 50)
-                        {
-                            note.Time -= prob2;
-                        }
-                        else
-                        {
-                            note.Time += prob2;
-                        }
-                    }
-                }
-            }
-
-            midiFile.Write(FileName, true);
-        }
-
-        static void ReadNotes()
-        {
-            var midiFile = MidiFile.Read(FileName);
-
-            foreach (var trackChunk in midiFile.GetTrackChunks())
-            {
-                using (var notesManager = trackChunk.ManageNotes())
-                {
-                    notesManager.Objects.RemoveAll(n => n.NoteName == NoteName.CSharp);
-
-                    if (notesManager.Objects.Any())
-                    {
-                        var times = notesManager.Objects.Select(t => t.Time).ToList();
-                        times.ForEach(t => Console.WriteLine(t));
-                    }
-                }
+                case "1":
+                    MidiManager.CreateSingleNoteTrack();
+                    break;
+                case "2":
+                    MidiManager.ReadNotes();
+                    break;
+                case "3":
+                    MidiManager.ChangeNotePositions();
+                    break;
+                default:
+                    Console.WriteLine("Uncorrect input");
+                    break;
             }
         }
     }
