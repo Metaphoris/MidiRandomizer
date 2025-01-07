@@ -7,7 +7,7 @@ namespace MidiRandomizer
 {
     internal class Program
     {
-        public const string FileName = "My Future Great Song.mid";
+        public const string FileName = "Song.mid";
 
         static void Main(string[] args)
         {
