@@ -2,6 +2,7 @@
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.MusicTheory;
+using Note = Melanchall.DryWetMidi.Interaction.Note;
 
 namespace MidiRandomizer
 {
@@ -41,21 +42,20 @@ namespace MidiRandomizer
                     foreach (var note in notesManager.Objects)
                     {
                         int prob = gen.Next(100);
-                        int prob2 = gen2.Next(12);
+                        //int prob2 = gen2.Next(12);
+                        int prob2 = gen2.Next(GetMaxRnd(note));
 
                         if (prob < 50)
-                        {
                             note.Time -= prob2;
-                        }
                         else
-                        {
                             note.Time += prob2;
-                        }
                     }
                 }
             }
 
             midiFile.Write(FileName, true);
+
+            int GetMaxRnd(Note note) => Convert.ToInt32(note.EndTime - note.Time) / 100;
         }
 
         public static void ReadNotes()
