@@ -10,7 +10,7 @@ namespace MidiRandomizer
     {
         public const string FileName = "Song";
         public const string FileType = "mid";
-        public const int DeviationPercent = 5;
+        public const int DeviationPercent = 10;
 
         public static void CreateSingleNoteTrack()
         {
@@ -30,35 +30,37 @@ namespace MidiRandomizer
 
         public static void ChangeNotePositions()
         {
-            var myFiles = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), $"*.{FileType}", SearchOption.AllDirectories).ToList();
+            var midiFileDirectories = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), $"*.{FileType}", SearchOption.AllDirectories).ToList();
 
-            /*
-            var midiFile = MidiFile.Read($"{FileName}.{FileType}");
-
-            Random increaseRnd = new Random();
-            Random deviationRnd = new Random();
-
-            foreach (var trackChunk in midiFile.GetTrackChunks())
+            foreach (var midiFileDirectory in midiFileDirectories)
             {
-                using (var notesManager = trackChunk.ManageNotes())
-                {
-                    foreach (var note in notesManager.Objects)
-                    {
-                        int deviation = deviationRnd.Next(GetMaxRnd(note));
+                var midiFile = MidiFile.Read(midiFileDirectory);
 
-                        if (IsIncrease(increaseRnd))
-                            note.Time += deviation;
-                        else
-                            note.Time -= deviation;
+                Random increaseRnd = new Random();
+                Random deviationRnd = new Random();
+
+                foreach (var trackChunk in midiFile.GetTrackChunks())
+                {
+                    using (var notesManager = trackChunk.ManageNotes())
+                    {
+                        foreach (var note in notesManager.Objects)
+                        {
+                            int deviation = deviationRnd.Next(GetMaxRnd(note));
+
+                            if (IsIncrease(increaseRnd))
+                                note.Time += deviation;
+                            else
+                                note.Time -= deviation;
+                        }
                     }
                 }
+
+                midiFile.Write($"{midiFileDirectory} {DeviationPercent}%.{FileType}", true);
+
+                static int GetMaxRnd(Note note) => Convert.ToInt32(note.EndTime - note.Time) * DeviationPercent / 100;
+
+                static bool IsIncrease(Random rnd) => rnd.Next(100) < 50;
             }
-
-            midiFile.Write($"{FileName} {DeviationPercent}%.{FileType}", true);
-
-            static int GetMaxRnd(Note note) => Convert.ToInt32(note.EndTime - note.Time) * DeviationPercent / 100;
-
-            static bool IsIncrease(Random rnd) => rnd.Next(100) < 50;*/
         }
 
         public static void ReadNotes()
