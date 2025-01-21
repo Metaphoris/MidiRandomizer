@@ -55,7 +55,7 @@ namespace MidiRandomizer
 
                             if (IsIncrease(rnd))
                                 note.Velocity = (SevenBitNumber)((int)note.Velocity + velocityDeviation);
-                            else
+                            else if ((int)note.Velocity >= velocityDeviation)
                                 note.Velocity = (SevenBitNumber)((int)note.Velocity - velocityDeviation);
                         }
                     }
