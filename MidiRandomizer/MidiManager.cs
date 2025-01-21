@@ -37,9 +37,7 @@ namespace MidiRandomizer
             {
                 var midiFile = MidiFile.Read(midiFileDirectory);
 
-                Random increaseRnd = new Random();
-                Random deviationTimeRnd = new Random();
-                Random deviationVelocityRnd = new Random();
+                Random rnd = new Random();
 
                 foreach (var trackChunk in midiFile.GetTrackChunks())
                 {
@@ -47,17 +45,18 @@ namespace MidiRandomizer
                     {
                         foreach (var note in notesManager.Objects)
                         {
-                            int deviation = deviationTimeRnd.Next(GetMaxRndTime(note));
+                            int timeDeviation = rnd.Next(GetMaxRndTime(note));
+                            int velocityDeviation = rnd.Next(MaxVelocityDeviation);
 
-                            if (IsIncrease(increaseRnd))
-                                note.Time += deviation;
-                            else if (note.Time >= deviation)
-                                note.Time -= deviation;
+                            if (IsIncrease(rnd))
+                                note.Time += timeDeviation;
+                            else if (note.Time >= timeDeviation)
+                                note.Time -= timeDeviation;
 
-                            if (IsIncrease(increaseRnd))
-                                note.Velocity = (SevenBitNumber)((int)note.Velocity + MaxVelocityDeviation);
+                            if (IsIncrease(rnd))
+                                note.Velocity = (SevenBitNumber)((int)note.Velocity + velocityDeviation);
                             else
-                                note.Velocity = (SevenBitNumber)((int)note.Velocity - MaxVelocityDeviation);
+                                note.Velocity = (SevenBitNumber)((int)note.Velocity - velocityDeviation);
                         }
                     }
                 }
