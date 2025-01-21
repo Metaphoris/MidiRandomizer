@@ -10,7 +10,8 @@ namespace MidiRandomizer
     {
         public const string FileName = "Song";
         public const string FileType = "mid";
-        public const int DeviationPercent = 10;
+        public const int TimeDeviationPercent = 10;
+        public const int MaxVelocityDeviation = 5;
 
         public static void CreateSingleNoteTrack()
         {
@@ -28,16 +29,17 @@ namespace MidiRandomizer
             midiFile.Write($"{FileName}.{FileType}");
         }
 
-        public static void ChangeNotePositions()
+        public static void RandomizeTimeAndVelocity()
         {
-            var midiFileDirectories = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), $"*.{FileType}", SearchOption.AllDirectories).ToList();
+            var midiFileDirectories = GetMidiFileDirectories();
 
             foreach (var midiFileDirectory in midiFileDirectories)
             {
                 var midiFile = MidiFile.Read(midiFileDirectory);
 
                 Random increaseRnd = new Random();
-                Random deviationRnd = new Random();
+                Random deviationTimeRnd = new Random();
+                Random deviationVelocityRnd = new Random();
 
                 foreach (var trackChunk in midiFile.GetTrackChunks())
                 {
@@ -45,19 +47,24 @@ namespace MidiRandomizer
                     {
                         foreach (var note in notesManager.Objects)
                         {
-                            int deviation = deviationRnd.Next(GetMaxRnd(note));
+                            int deviation = deviationTimeRnd.Next(GetMaxRndTime(note));
 
                             if (IsIncrease(increaseRnd))
                                 note.Time += deviation;
-                            else
+                            else if (note.Time >= deviation)
                                 note.Time -= deviation;
+
+                            if (IsIncrease(increaseRnd))
+                                note.Velocity = (SevenBitNumber)((int)note.Velocity + MaxVelocityDeviation);
+                            else
+                                note.Velocity = (SevenBitNumber)((int)note.Velocity - MaxVelocityDeviation);
                         }
                     }
                 }
 
-                midiFile.Write($"{midiFileDirectory} {DeviationPercent}%.{FileType}", true);
+                midiFile.Write($"{midiFileDirectory} {TimeDeviationPercent}%.{FileType}", true);
 
-                static int GetMaxRnd(Note note) => Convert.ToInt32(note.EndTime - note.Time) * DeviationPercent / 100;
+                static int GetMaxRndTime(Note note) => Convert.ToInt32(note.EndTime - note.Time) * TimeDeviationPercent / 100;
 
                 static bool IsIncrease(Random rnd) => rnd.Next(100) < 50;
             }
@@ -65,21 +72,29 @@ namespace MidiRandomizer
 
         public static void ReadNotes()
         {
-            var midiFile = MidiFile.Read($"{FileName}.{FileType}");
+            var midiFileDirectories = GetMidiFileDirectories();
 
-            foreach (var trackChunk in midiFile.GetTrackChunks())
+            foreach (var midiFileDirectory in midiFileDirectories)
             {
-                using (var notesManager = trackChunk.ManageNotes())
-                {
-                    notesManager.Objects.RemoveAll(n => n.NoteName == NoteName.CSharp);
+                var midiFile = MidiFile.Read(midiFileDirectory);
 
-                    if (notesManager.Objects.Any())
+                foreach (var trackChunk in midiFile.GetTrackChunks())
+                {
+                    using (var notesManager = trackChunk.ManageNotes())
                     {
-                        var times = notesManager.Objects.Select(t => t.Time).ToList();
-                        times.ForEach(t => Console.WriteLine(t));
+                        notesManager.Objects.RemoveAll(n => n.NoteName == NoteName.CSharp);
+
+                        if (notesManager.Objects.Any())
+                        {
+                            var timeAndVelocity = notesManager.Objects.Select(t => new { t.Time, t.Velocity }).ToList();
+                            timeAndVelocity.ForEach(t => Console.WriteLine($"Time: {t.Time}. Velocity: {t.Velocity}"));
+                        }
                     }
                 }
             }
         }
+
+        private static List<string> GetMidiFileDirectories()
+            => Directory.EnumerateFiles(Directory.GetCurrentDirectory(), $"*.{FileType}", SearchOption.AllDirectories).ToList();
     }
 }
