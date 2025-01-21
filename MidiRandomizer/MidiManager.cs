@@ -11,7 +11,7 @@ namespace MidiRandomizer
         public const string FileName = "Song";
         public const string FileType = "mid";
         public const int TimeDeviationPercent = 10;
-        public const int MaxVelocityDeviation = 5;
+        public const int MaxVelocityDeviation = 7;
 
         public static void CreateSingleNoteTrack()
         {
