@@ -14,7 +14,7 @@
             Console.WriteLine("Hello! What do you want to do?");
             Console.WriteLine("Enter \"1\" to create single note track");
             Console.WriteLine("Enter \"2\" to print time and velocity of all notes");
-            Console.WriteLine("Enter \"3\" to randomize all notes positions");
+            Console.WriteLine("Enter \"3\" to randomize time and velocity of all notes");
         }
 
         static void ExecuteUserAction()

@@ -10,7 +10,7 @@ namespace MidiRandomizer
     {
         public const string FileName = "Song";
         public const string FileType = "mid";
-        public const int TimeDeviationPercent = 10;
+        public const int TimeDeviationPercent = 5;
         public const int MaxVelocityDeviation = 7;
 
         public static void CreateSingleNoteTrack()
@@ -31,13 +31,13 @@ namespace MidiRandomizer
 
         public static void RandomizeTimeAndVelocity()
         {
+            Random rnd = new Random();
+
             var midiFileDirectories = GetMidiFileDirectories();
 
             foreach (var midiFileDirectory in midiFileDirectories)
             {
                 var midiFile = MidiFile.Read(midiFileDirectory);
-
-                Random rnd = new Random();
 
                 foreach (var trackChunk in midiFile.GetTrackChunks())
                 {
@@ -53,7 +53,7 @@ namespace MidiRandomizer
                             else if (note.Time >= timeDeviation)
                                 note.Time -= timeDeviation;
 
-                            if (IsIncrease(rnd))
+                            if (IsIncrease(rnd) && (int)note.Velocity + velocityDeviation <= 127)
                                 note.Velocity = (SevenBitNumber)((int)note.Velocity + velocityDeviation);
                             else if ((int)note.Velocity >= velocityDeviation)
                                 note.Velocity = (SevenBitNumber)((int)note.Velocity - velocityDeviation);
